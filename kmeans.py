@@ -3,6 +3,7 @@ import spacy
 import numpy as np
 import random
 import math
+import pickle as pk
 
 def readData(file):
     data=[]
@@ -72,20 +73,17 @@ def clustering(x_values,iterations,k = 2):
 		cn.append(0)
 
 	for j in range(iterations):
-		#print("initialize_mk")
 		for i in range(m):
 			cn[i] = get_closest(x_values[i],mk)
-			#print("closest",i)
-
+		centroids.append(np.array(cn))
 		mk = get_mk_points(cn,x_values)
-		#print("mk points")
-		centroids.append(cn)
 	return centroids
 
 def initialize_mk(x_values,k = 2):
 	mk = []
 	for i in range(k):
-		mi = x_values[random.randint(0,len(x_values))]
+		r = random.randint(0,len(x_values)-1)
+		mi = x_values[r]
 		mk.append(mi)
 	return mk	
 
@@ -116,7 +114,7 @@ def get_mk_points(centroids, x_values, k = 2):
 	for i in range(k):
 		aux = np.array(mks[i])
 		if len(aux) == 0:
-			mks[i] = np.array([x_values[random.randint(0,len(x_values))]])
+			mks[i] = np.array([x_values[random.randint(0,len(x_values)-1)]])
 		
 	for i in range(k):
 		aux = np.array([])
@@ -147,15 +145,15 @@ def get_cluster_numbers(centroids, tags):
 def error_table(clusters, y_values,tags):
 	cl = len(clusters)
 	print("Real values:")
-	print("Spam",y_values.count(1))
 	print("Ham",y_values.count(0))
+	print("Spam",y_values.count(1))
 	for i in range(cl):
 		print("Cluster",i,":")
 		for tag in tags:
 			print(tag, clusters[i][tag])
 
 if __name__ == '__main__':
-	data = readData("data.txt")
+	'''data = readData("data.txt")
 	x_values = mat_x(data)
 	y_values = mat_y(data)
 	print("Data")
@@ -167,11 +165,17 @@ if __name__ == '__main__':
 	print("Voc")
 
 	x_values = num_mat_x(x_values,voc)
-	print("Nums")
+	print("Nums")'''
+
+	fx = open("x.bit","rb")
+	x_values = pk.load(fx)
+	fx.close()
+
+	fy = open("y.bit","rb")
+	y_values = pk.load(fy)
+	fy.close()
 
 	centroids = clustering(x_values,2)
-	print("Cluster")
-	#print(centroids)
 
 	tags = ["ham","spam"]
 	clusters = get_cluster_numbers(centroids, tags)
