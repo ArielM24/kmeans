@@ -3,7 +3,6 @@ import spacy
 import numpy as np
 import random
 import math
-import pickle as pk
 
 def readData(file):
     data=[]
@@ -143,41 +142,37 @@ def get_cluster_numbers(centroids, tags):
 	return clusters
 
 def error_table(clusters, y_values,tags):
+	sep = "-" * 37 + "\n"
+	table = "{:15s}|".format("")
+	for tag in tags:
+		table = table + "{:10s}|".format(tag)
+	table = table + "\n" + sep
+	table = table + "{:15s}|".format("Real values")
 	cl = len(clusters)
-	print("Real values:")
-	print("Ham",y_values.count(0))
-	print("Spam",y_values.count(1))
-	for i in range(cl):
-		print("Cluster",i,":")
+	for i in range(len(tags)):
+		table = table + "{:10s}|".format(str(y_values.count(i)))
+	table = table + "\n" + sep
+	
+	for j in range(cl):
+		table = table + "{:15s}|".format("Cluster "+str(j))
 		for tag in tags:
-			print(tag, clusters[i][tag])
+			table = table + "{:10s}|".format(str(clusters[j][tag]))
+		table = table + "\n" + sep
+	return table
 
 if __name__ == '__main__':
-	'''data = readData("data.txt")
+	data = readData("data.txt")
+	
 	x_values = mat_x(data)
-	y_values = mat_y(data)
-	print("Data")
-
 	x_values = get_lems(x_values)
-	print("Lems")
-
 	voc = vocabulary(x_values)	
-	print("Voc")
-
 	x_values = num_mat_x(x_values,voc)
-	print("Nums")'''
 
-	fx = open("x.bit","rb")
-	x_values = pk.load(fx)
-	fx.close()
-
-	fy = open("y.bit","rb")
-	y_values = pk.load(fy)
-	fy.close()
+	y_values = mat_y(data)
 
 	centroids = clustering(x_values,2)
 
-	tags = ["ham","spam"]
+	tags = ["Ham","Spam"]
 	clusters = get_cluster_numbers(centroids, tags)
 
-	error_table(clusters,y_values,tags)
+	print(error_table(clusters,y_values,tags))
